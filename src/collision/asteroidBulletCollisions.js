@@ -21,39 +21,38 @@ function AsteroidBulletCollisions(gameObjects) {
 
     self.removeAsteroid = function (asteroid) {
         var index = asteroids.indexOf(asteroid);
-
-        if (index > -1) {
-            asteroids.splice(index, 1);
-        }
+        asteroids.splice(index, 1);
     }
 
     self.removeBullet = function (bullet) {
         var index = bullets.indexOf(bullet);
-
-        if (index > -1) {
-            bullets.splice(index, 1);
-        }
+        bullets.splice(index, 1);
     }
     
     self.update = function () {
         for (var i = 0; i < bullets.length; i++)
-            for (var j = 0; j < asteroids.length; j++)
+            for (var j = 0; j < asteroids.length; j++) {
+
+                if (bullets[i] == undefined || asteroids[j] == undefined)
+                    continue;
+
                 if (collisionDetection.isCollided(bullets[i].sprite, asteroids[j].sprite))
                 {
                     var iobj = makeEventObject(bullets[i]);
                     var jobj = makeEventObject(asteroids[j]);
 
-                    bullets[i].struck(jobj);
+                    bullets[i].struck(jobj);                    
                     asteroids[j].struck(iobj);
                 }
+            }
     }
 
-    var makeEventObject = function (asteroid) {
+    var makeEventObject = function (gameObj) {
         return {
-            x: asteroid.sprite.x,
-            y: asteroid.sprite.y,
-            speed: asteroid.speed,
-            direction: asteroid.direction
+            x: gameObj.sprite.x,
+            y: gameObj.sprite.y,
+            speed: gameObj.speed,
+            direction: gameObj.direction
         };
     }
 

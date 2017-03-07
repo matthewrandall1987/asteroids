@@ -6,17 +6,16 @@ function AsteroidFactory(asteroidCollision, asteroidBulletCollision) {
     var _clientHeight;
     var _clientWidth;
 
-    var _maxspeed = 7;
+    var _maxspeed = 4;
     var _minspeed = 3;
 
     var _stage;
     var _gameObjects;
     var _make_large;
 
-    var _asteroidCount = 0;
+    var asteroidsToMake = [];
 
     self.start = function (sprites, renderer, stage, gameObjects) {    
-        gameObjects.push(self);
 
         _clientHeight = renderer.view.clientHeight;
         _clientWidth = renderer.view.clientWidth;
@@ -25,13 +24,20 @@ function AsteroidFactory(asteroidCollision, asteroidBulletCollision) {
                 
         _stage = stage;
         _gameObjects = gameObjects;
+        _gameObjects.push(self);
+          
+        for (var i = 0; i < 3; i ++) {
+            asteroidsToMake.push({ type: "large", position: nextRandomAsteroid() });
+        }
     };
 
-    self.update = function () {        
-        if (_asteroidCount < 3) {
-            makeAsteroid("large", nextRandomAsteroid());
-            _asteroidCount++;
-        }         
+    self.update = function () {  
+
+        for (var i = 0; i < asteroidsToMake.length; i++) {
+            makeAsteroid(asteroidsToMake[i].type, asteroidsToMake[i].position);
+        }
+
+        asteroidsToMake = [];
     };
 
     var makeAsteroid = function (type, position) {       
@@ -47,7 +53,7 @@ function AsteroidFactory(asteroidCollision, asteroidBulletCollision) {
             asteroid.addOnDestroyed(onDestroyed);
             asteroidCollision.add(asteroid);
             asteroidBulletCollision.addAsteroid(asteroid);
-            
+
             _gameObjects.push(asteroid);
     }
 
@@ -57,38 +63,26 @@ function AsteroidFactory(asteroidCollision, asteroidBulletCollision) {
     
 
     var nextAsteroid = function (asteroid, type, i) {
-        var x = 0;
-        var y = 0;
-        var direction = 0;
         var speed = Math.floor(Math.random() * (_maxspeed - _minspeed + 1) + _minspeed);
+        
+        var width = type == "medium" ? asteroid.sprite.width / 2 : asteroid.sprite.width / 4;
+        var height = type == "medium" ? asteroid.sprite.height / 2 : asteroid.sprite.height / 4;
 
-        if (i == 0) {         
-            direction = asteroid.direction;
-            x = asteroid.sprite.x + (asteroid.sprite.width * Math.cos(direction));
-            y = asteroid.sprite.y + (asteroid.sprite.height * Math.sin(direction));
-        }
-        else if (i == 1) {
-            direction = asteroid.direction + 1.5708;
-            x = asteroid.sprite.x + (asteroid.sprite.width * Math.cos(direction));
-            y = asteroid.sprite.y + (asteroid.sprite.height * Math.sin(direction));
-        }
-        else if (i == 2) {
-            direction = asteroid.direction + 3.14159;
-            x = asteroid.sprite.x + (asteroid.sprite.width * Math.cos(direction));
-            y = asteroid.sprite.y + (asteroid.sprite.height * Math.sin(direction));
-        }
-        else {
-            direction = asteroid.direction + 4.71239;
-            x = asteroid.sprite.x + (asteroid.sprite.width * Math.cos(direction));
-            y = asteroid.sprite.y + (asteroid.sprite.height * Math.sin(direction));
-        }
+        var randomRotation = Math.random() * (0.349066 + 1);
 
+        var direction = 6.28319 + randomRotation;
+        if (i == 1) 
+            direction = 1.5708 + randomRotation;
+        else if (i == 2) 
+            direction = 3.14159 + randomRotation;
+        else if ( i == 3)
+            direction = 4.71239 + randomRotation;
 
         return {
-            y : useX ? x : 0,
-            x : useX ? 0 : y,
-            rotation : (Math.random() * 6.28319).toPrecision(5),
-            speed : Math.floor(Math.random() * (_maxspeed - _minspeed + 1) + _minspeed),   
+            y : asteroid.sprite.y + (height * Math.sin(direction)),
+            x : asteroid.sprite.x + (width * Math.cos(direction)),
+            rotation : direction,
+            speed : speed
         }
     }
 
@@ -108,33 +102,32 @@ function AsteroidFactory(asteroidCollision, asteroidBulletCollision) {
     }
 
     var onDestroyed = function (asteroid) {
-        asteroidCollision.remove(asteroid);        
+        asteroidCollision.remove(asteroid);         
         asteroidBulletCollision.removeAsteroid(asteroid);
+ 
+        var type = asteroid.type == "large" ? "medium" : "small";
 
         switch (asteroid.type)
         {
             case "large":
             case "medium":
                 for (var i = 0; i < 4; i++) {
-                    makeAsteroid()
+                    asteroidsToMake.push({ type: type, position: nextAsteroid(asteroid, type, i) });
                 }
                 break;
             case "small":
                 break;            
         }
-        if (asteroid.type == "large") {
-            
-        }
-        else if (asteroid.type == "small") {
-
-        }
-        else {
-            
-        }
-
-        //_ asteroidCount--;
     }
 };
+
+function AsteroidExplosion() {
+    var self = this;
+
+    self.update = function (ticks) {
+
+    };
+}
 
 
 function Asteroid(sprite, values, clientWidth, clientHeight, stage, type) {
@@ -146,6 +139,7 @@ function Asteroid(sprite, values, clientWidth, clientHeight, stage, type) {
     self.rotationReverse = false;
     self.velocity = 0;
     self.type = type;
+    self.isDelete = false;
 
     self.direction = 0;
 
@@ -182,8 +176,9 @@ function Asteroid(sprite, values, clientWidth, clientHeight, stage, type) {
     
     self.update = function () {
 
-        if (self.isDelete)
+        if (self.isDelete) {                
             return;
+        }
 
         if (self.rotationReverse)
             self.sprite.rotation -= self.rotationSpeed;
@@ -207,18 +202,12 @@ function Asteroid(sprite, values, clientWidth, clientHeight, stage, type) {
     }
 
     self.struck = function (bullet) {
-        // create 4 more
-
-        deleteme();
-    };
-
-    var deleteme = function () {
         self.isDelete = true;
         stage.removeChild(self.sprite);
 
         for (var i = 0; i < onDestroyedDelegates.length; i++)
             onDestroyedDelegates[i](self);
-    }
+    };
 
     var repositionIfOutsideBounds = function () {
         
@@ -234,8 +223,6 @@ function Asteroid(sprite, values, clientWidth, clientHeight, stage, type) {
         else if (self.sprite.y >= clientHeight)
             self.sprite.y = 0;
     };
-
-    self.isDelete = false;
 
     init();
 }

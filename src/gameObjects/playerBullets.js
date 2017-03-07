@@ -1,8 +1,13 @@
-function PlayerBullets(stage, spriteMaker, gameObjects, asteroidBulletCollision) {
+function PlayerBullets(stage, spriteMaker, gameObjects, asteroidBulletCollision, clientWidth, clientHeight) {
 
     var self = this;
     self.canFire = true;
     var lastFire = 0;
+    var _gameObjects = [];
+
+    var init = function () {
+        _gameObjects = gameObjects;
+    }
 
     self.fire = function (x, y, rotation, tick) {
 
@@ -11,10 +16,9 @@ function PlayerBullets(stage, spriteMaker, gameObjects, asteroidBulletCollision)
             var sprite = makeSprite(x, y, rotation);        
             stage.addChild(sprite);
 
-            var bullet = new PlayerBullet(stage, sprite, onDestroyed);
-            asteroidBulletCollision.addBullet(bullet);
-
+            var bullet = new PlayerBullet(stage, sprite, onDestroyed, clientWidth, clientHeight);
             gameObjects.push(bullet); 
+            asteroidBulletCollision.addBullet(bullet);
         }
     }
  
@@ -33,6 +37,8 @@ function PlayerBullets(stage, spriteMaker, gameObjects, asteroidBulletCollision)
 
         return sprite;
     }
+
+    init();
 }
 
 function PlayerBullet(stage, sprite, onDestroyed, clientWidth, clientHeight) {
@@ -48,6 +54,11 @@ function PlayerBullet(stage, sprite, onDestroyed, clientWidth, clientHeight) {
     };
 
     self.update = function () {
+
+        if (self.isDelete) {
+            return;
+        }
+        
         self.sprite.x += 20 * Math.cos(self.sprite.rotation);
         self.sprite.y += 20 * Math.sin(self.sprite.rotation);
 
@@ -58,12 +69,12 @@ function PlayerBullet(stage, sprite, onDestroyed, clientWidth, clientHeight) {
         deleteme();
     };    
 
-    var deleteme = function () {        
+    var deleteme = function () {  
         self.isDelete = true;
         stage.removeChild(self.sprite);
 
         for (var i = 0; i < onDestroyedDelegates.length; i++)
-            onDestroyedDelegates[i](self);
+            onDestroyedDelegates[i](self);       
     }
 
     var deleteIfOutsideBounds = function () {
@@ -80,4 +91,6 @@ function PlayerBullet(stage, sprite, onDestroyed, clientWidth, clientHeight) {
         else if (self.sprite.y >= clientHeight)
             deleteme();
     };
+
+    init();
 }

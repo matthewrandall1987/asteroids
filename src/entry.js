@@ -29,9 +29,8 @@ function Game() {
         sprites = res[1];
         
         var asteroidCollisions = new AsteroidCollisions(gameObjects);
-        var asteroidBulletCollisions = new AsteroidBulletCollisions(gameObjects);
-        
-        PlayerShipFactory.make(sprites, renderer, stage, keyboard, gameObjects, asteroidBulletCollisions);
+        var asteroidBulletCollisions = new AsteroidBulletCollisions(gameObjects);        
+        var playerShipFactory = new PlayerShipFactory(sprites, renderer, stage, keyboard, gameObjects, asteroidBulletCollisions);
 
         var asteroidFactory = new AsteroidFactory(asteroidCollisions, asteroidBulletCollisions);
         asteroidFactory.start(sprites, renderer, stage, gameObjects);
@@ -44,18 +43,16 @@ function Game() {
         var toDel = [];
         var tick = Date.now();
         
-        for (var i = 0; i < gameObjects.length; i++) {
-            gameObjects[i].update(tick);
+        for (var i = 0; i < gameObjects.length; i++) {  
+            if (gameObjects[i].isDelete) 
+                toDel.push(gameObjects[i]);
 
-            if (gameObjects[i].isDelete)
-                toDel.push({ 
-                    index: i, 
-                    obj: gameObjects[i] 
-                });
+            gameObjects[i].update(tick);            
         }
 
         for (var i = 0; i < toDel.length; i++) {
-            gameObjects.splice(toDel[i].index, 1);
+            var index = gameObjects.indexOf(toDel[i]);
+            gameObjects.splice(index, 1);
         }
 
         renderer.render(stage);

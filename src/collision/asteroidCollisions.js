@@ -16,10 +16,7 @@ function AsteroidCollisions(gameObjects) {
 
     self.remove = function (asteroid) {
         var index = asteroids.indexOf(asteroid);
-
-        if (index > -1) {
-            asteroids.splice(index, 1);
-        }
+        asteroids.splice(index, 1);
     }
     
     self.update = function () {

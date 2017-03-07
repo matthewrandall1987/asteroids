@@ -1,8 +1,8 @@
 
 
-var PlayerShipFactory = (function () {
+function PlayerShipFactory(sprites, renderer, stage, keyboard, gameObjects, asteroidBulletCollisions) {
 
-    this.make = function (sprites, renderer, stage, keyboard, gameObjects, asteroidBulletCollisions) {
+    var init = function () {
 
         var y = (renderer.view.clientHeight / 2);
         var x = (renderer.view.clientWidth / 2);
@@ -11,16 +11,16 @@ var PlayerShipFactory = (function () {
 
         stage.addChild(sprite);
         
-        var bullets = new PlayerBullets(stage, sprites.bullet, gameObjects, asteroidBulletCollisions);
+        var bullets = new PlayerBullets(stage, sprites.bullet, gameObjects, asteroidBulletCollisions, renderer.view.clientWidth, renderer.view.clientHeight);
         var ship = new PlayerShip(sprite, { x: x, y: y }, keyboard, bullets, renderer.view.clientWidth, renderer.view.clientHeight);        
         
         gameObjects.push(ship);
 
         return ship;
     }
-
-    return this;
-})();
+    
+    init();
+};
 
 function PlayerShip(sprite, position, keyboard, bullets, clientWidth, clientHeight) {
 
