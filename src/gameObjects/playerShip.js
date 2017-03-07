@@ -1,8 +1,12 @@
 
 
-function PlayerShipFactory(sprites, renderer, stage, keyboard, gameObjects, asteroidBulletCollisions) {
+function PlayerShipFactory(asteroidBulletCollisions) {
 
-    var init = function () {
+    var self = this;
+
+    var init = function () {};
+
+    self.start = function (sprites, renderer, stage, keyboard, gameObjects) {
 
         var y = (renderer.view.clientHeight / 2);
         var x = (renderer.view.clientWidth / 2);
@@ -17,7 +21,7 @@ function PlayerShipFactory(sprites, renderer, stage, keyboard, gameObjects, aste
         gameObjects.push(ship);
 
         return ship;
-    }
+    };
     
     init();
 };
@@ -25,7 +29,11 @@ function PlayerShipFactory(sprites, renderer, stage, keyboard, gameObjects, aste
 function PlayerShip(sprite, position, keyboard, bullets, clientWidth, clientHeight) {
 
     var self = this;
+    var lastSpeedTick = 0;
+
     self.sprite = sprite;
+    self.speed = 0;
+    self.rotationSpeed = 4.71239;
 
     var init = function () {
         self.sprite.anchor.x = 0.5;
@@ -39,6 +47,7 @@ function PlayerShip(sprite, position, keyboard, bullets, clientWidth, clientHeig
 
     self.update = function (tick) {
 
+
         if (keyboard.isLeft()) 
             self.sprite.rotation -= 0.1;
             
@@ -46,7 +55,11 @@ function PlayerShip(sprite, position, keyboard, bullets, clientWidth, clientHeig
             self.sprite.rotation += 0.1;
         
         if (keyboard.isUp()) 
-            updateUpKey();
+            updateUpKey(tick);
+        else if (keyboard.isDown())
+            updateBackKey(tick);
+        else
+            updateNoKey(tick);
 
         if (keyboard.isSpace()) 
         {
@@ -58,12 +71,55 @@ function PlayerShip(sprite, position, keyboard, bullets, clientWidth, clientHeig
             );
         }
 
+        self.sprite.x += self.speed * Math.cos(self.rotationSpeed);
+        self.sprite.y += self.speed * Math.sin(self.rotationSpeed);
+
+        if (tick - lastSpeedTick > 100)
+            lastSpeedTick = tick;
+            
         repositionIfOutsideBounds();
     }
 
-    var updateUpKey = function () {
-        self.sprite.x += 5 * Math.cos(self.sprite.rotation);
-        self.sprite.y += 5 * Math.sin(self.sprite.rotation);
+    var updateUpKey = function (tick) {
+
+        if (tick - lastSpeedTick > 100 && self.speed < 7) {
+            self.speed++;
+            
+            if (self.speed > 7)
+                self.speed = 7;
+        }
+
+        if (self.sprite.rotation > self.rotationSpeed) 
+            self.rotationSpeed += 0.05;
+        else if (self.sprite.rotation < self.rotationSpeed)
+            self.rotationSpeed -= 0.05;
+    }
+
+    var updateNoKey = function (tick) {
+
+        if (tick - lastSpeedTick > 100 && self.speed > 0) {
+            self.speed -= 0.5;
+        }
+            
+        if (self.sprite.rotation > self.rotationSpeed) 
+            self.rotationSpeed += 0.05;
+        else if (self.sprite.rotation < self.rotationSpeed)
+            self.rotationSpeed -= 0.05;
+    }
+
+    var updateBackKey = function (tick) {
+
+        if (tick - lastSpeedTick > 100 && self.speed > 0) {
+            self.speed -= 1.5;
+
+            if (self.speed < 0)
+                self.speed = 0;
+        }
+            
+        if (self.sprite.rotation > self.rotationSpeed) 
+            self.rotationSpeed += 0.05;
+        else if (self.sprite.rotation < self.rotationSpeed)
+            self.rotationSpeed -= 0.05;
     }
     
     var repositionIfOutsideBounds = function () {

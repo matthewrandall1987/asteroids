@@ -30,7 +30,9 @@ function Game() {
         
         var asteroidCollisions = new AsteroidCollisions(gameObjects);
         var asteroidBulletCollisions = new AsteroidBulletCollisions(gameObjects);        
-        var playerShipFactory = new PlayerShipFactory(sprites, renderer, stage, keyboard, gameObjects, asteroidBulletCollisions);
+        
+        var playerShipFactory = new PlayerShipFactory(asteroidBulletCollisions);        
+        playerShipFactory.start(sprites, renderer, stage, keyboard, gameObjects);
 
         var asteroidFactory = new AsteroidFactory(asteroidCollisions, asteroidBulletCollisions);
         asteroidFactory.start(sprites, renderer, stage, gameObjects);
@@ -46,8 +48,8 @@ function Game() {
         for (var i = 0; i < gameObjects.length; i++) {  
             if (gameObjects[i].isDelete) 
                 toDel.push(gameObjects[i]);
-
-            gameObjects[i].update(tick);            
+            else
+                gameObjects[i].update(tick);            
         }
 
         for (var i = 0; i < toDel.length; i++) {

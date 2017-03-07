@@ -54,11 +54,6 @@ function PlayerBullet(stage, sprite, onDestroyed, clientWidth, clientHeight) {
     };
 
     self.update = function () {
-
-        if (self.isDelete) {
-            return;
-        }
-        
         self.sprite.x += 20 * Math.cos(self.sprite.rotation);
         self.sprite.y += 20 * Math.sin(self.sprite.rotation);
 

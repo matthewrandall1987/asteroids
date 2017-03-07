@@ -18,14 +18,12 @@ function AsteroidFactory(asteroidCollision, asteroidBulletCollision) {
     self.start = function (sprites, renderer, stage, gameObjects) {    
 
         _clientHeight = renderer.view.clientHeight;
-        _clientWidth = renderer.view.clientWidth;
-        
+        _clientWidth = renderer.view.clientWidth;        
+        _gameObjects = gameObjects;        
         _make_large = sprites.large_asteroids;
-                
         _stage = stage;
-        _gameObjects = gameObjects;
-        _gameObjects.push(self);
-          
+
+        _gameObjects.push(self);          
         for (var i = 0; i < 3; i ++) {
             asteroidsToMake.push({ type: "large", position: nextRandomAsteroid() });
         }
@@ -175,11 +173,6 @@ function Asteroid(sprite, values, clientWidth, clientHeight, stage, type) {
     }
     
     self.update = function () {
-
-        if (self.isDelete) {                
-            return;
-        }
-
         if (self.rotationReverse)
             self.sprite.rotation -= self.rotationSpeed;
         else 
@@ -211,17 +204,17 @@ function Asteroid(sprite, values, clientWidth, clientHeight, stage, type) {
 
     var repositionIfOutsideBounds = function () {
         
-        if (self.sprite.x <= 0)
-            self.sprite.x = clientWidth;
+        if (self.sprite.x < 0 - self.sprite.width)
+            self.sprite.x = clientWidth + (self.sprite.width / 2);
 
-        else if (self.sprite.x >= clientWidth)
-            self.sprite.x = 0;
+        else if (self.sprite.x > clientWidth + self.sprite.width)
+            self.sprite.x = 0 - (self.sprite.width / 2);
 
-        if (self.sprite.y <= 0)
-            self.sprite.y = clientHeight;
+        if (self.sprite.y < 0 - self.sprite.height)
+            self.sprite.y = clientHeight + (self.sprite.height / 2);
 
-        else if (self.sprite.y >= clientHeight)
-            self.sprite.y = 0;
+        else if (self.sprite.y > clientHeight + self.sprite.height)
+            self.sprite.y = 0 - (self.sprite.height / 2);
     };
 
     init();
