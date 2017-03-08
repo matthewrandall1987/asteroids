@@ -3,8 +3,6 @@ function LoadResources() {
     var ship = "images/ship.png";
     var bullet = "images/bullet.png";
     var asteroid_sprites_large = "images/asteroid_sprites_large.png";
-    var asteroid_sprites_medium = "images/asteroid_sprites_medium.png";
-    var asteroid_sprites_small = "images/asteroid_sprites_small.png";
 
     var init = function () {
         
@@ -14,14 +12,12 @@ function LoadResources() {
         
         var promise = new Promise(function (resolve, reject) {
 
-            PIXI.loader.add([ship, bullet, asteroid_sprites_large, asteroid_sprites_medium, asteroid_sprites_small])
+            PIXI.loader.add([ship, bullet, asteroid_sprites_large])
                 .on("progress", loadProgressHandler)
                 .load(function () {
                     resolve({
                         ship: setup_ship,
                         large_asteroids : setup_asteroids_large,
-                        medium_asteroids : setup_asteroids_medium,
-                        small_asteroids : setup_asteroids_small,
                         bullet: setup_bullet
                     });
 
@@ -32,23 +28,40 @@ function LoadResources() {
     }
 
     var setup_ship = function () {
-        return new PIXI.Sprite(PIXI.loader.resources[ship].texture);
+
+        var mySpriteSheetImage  = PIXI.BaseTexture.fromImage(ship);
+
+        var texture = new PIXI.Texture(mySpriteSheetImage, new PIXI.Rectangle(0, 0, 75, 75));
+        var texture_acc = new PIXI.Texture(mySpriteSheetImage, new PIXI.Rectangle(75, 0, 75, 75));
+        var texture_dcc = new PIXI.Texture(mySpriteSheetImage, new PIXI.Rectangle(150, 0, 75, 75));
+
+        return {
+            sprite: new PIXI.Sprite(texture),
+            ship_texture: texture,
+            ship_accelerate_texture: texture_acc,
+            ship_deccelerate_texture: texture_dcc
+        };
+    }
+
+    var setup_ship_accelerate = function () {
+        var texture = PIXI.loader.resources[ship].texture;
+        
+        texture.frame = rectangle;
+
+        return new PIXI.Sprite(texture);
+    }
+    
+
+    var setup_ship_deccelerate = function () {
+        var texture = PIXI.loader.resources[ship].texture;
+        
+        texture.frame = rectangle;
+
+        return new PIXI.Sprite(texture);
     }
 
     var setup_asteroids_large = function () {
-
-        var texture = PIXI.loader.resources[asteroid_sprites_large].texture;
-        texture.frame = new PIXI.Rectangle(0,0, 201, 166);       
-
-        return new PIXI.Sprite(texture)
-    }
-
-    var setup_asteroids_medium = function () {
-        return new PIXI.Sprite(PIXI.loader.resources[asteroid_sprites_large].texture);
-    }
-
-    var setup_asteroids_small = function () {
-        return new PIXI.Sprite(PIXI.loader.resources[asteroid_sprites_large].texture);
+        return new PIXI.Sprite(PIXI.loader.resources[asteroid_sprites_large].texture)
     }
 
     var setup_bullet = function () {

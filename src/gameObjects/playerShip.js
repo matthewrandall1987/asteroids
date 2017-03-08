@@ -1,37 +1,44 @@
 
 
-function PlayerShipFactory(asteroidBulletCollisions) {
+function PlayerShipFactory(asteroidBulletCollisions, playerAsteroidCollisions, endGame) {
 
     var self = this;
 
-    var init = function () {};
+    var init = function () { };
+    var ship = null;
 
     self.start = function (sprites, renderer, stage, keyboard, gameObjects) {
-
+        
         var y = (renderer.view.clientHeight / 2);
         var x = (renderer.view.clientWidth / 2);
 
         var sprite = sprites.ship();
-
-        stage.addChild(sprite);
         
         var bullets = new PlayerBullets(stage, sprites.bullet, gameObjects, asteroidBulletCollisions, renderer.view.clientWidth, renderer.view.clientHeight);
-        var ship = new PlayerShip(sprite, { x: x, y: y }, keyboard, bullets, renderer.view.clientWidth, renderer.view.clientHeight);        
+        ship = new PlayerShip(sprite, { x: x, y: y }, stage, keyboard, bullets, renderer.view.clientWidth, renderer.view.clientHeight, onDestroyed);        
         
-        gameObjects.push(ship);
+        playerAsteroidCollisions.setPlayer(ship);
 
-        return ship;
+        gameObjects.push(ship);
+    };
+
+    var onDestroyed = function () {
+        playerAsteroidCollisions.setPlayer(undefined);
+        asteroidBulletCollisions.clearBullets();
+        self.isDelete = true;
+        ship.stop();
+        endGame();
     };
     
     init();
 };
 
-function PlayerShip(sprite, position, keyboard, bullets, clientWidth, clientHeight) {
+function PlayerShip(spriteObj, position, stage, keyboard, bullets, clientWidth, clientHeight, onDestroyed) {
 
     var self = this;
     var lastSpeedTick = 0;
 
-    self.sprite = sprite;
+    self.sprite = spriteObj.sprite;
     self.speed = 0;
     self.rotationSpeed = 4.71239;
 
@@ -43,10 +50,20 @@ function PlayerShip(sprite, position, keyboard, bullets, clientWidth, clientHeig
 
         self.sprite.x = position.x;
         self.sprite.y = position.y;
+
+        stage.addChild(self.sprite);
+    }
+
+    self.struck = function (asteroid) {
+        onDestroyed();
+    };
+
+    self.stop = function () {        
+        self.isDelete = true;
+        stage.removeChild(self.sprite);
     }
 
     self.update = function (tick) {
-
 
         if (keyboard.isLeft()) 
             self.sprite.rotation -= 0.1;
@@ -62,14 +79,12 @@ function PlayerShip(sprite, position, keyboard, bullets, clientWidth, clientHeig
             updateNoKey(tick);
 
         if (keyboard.isSpace()) 
-        {
             bullets.fire(
                 self.sprite.x,
                 self.sprite.y,
                 self.sprite.rotation,
                 tick
             );
-        }
 
         self.sprite.x += self.speed * Math.cos(self.rotationSpeed);
         self.sprite.y += self.speed * Math.sin(self.rotationSpeed);
@@ -93,6 +108,8 @@ function PlayerShip(sprite, position, keyboard, bullets, clientWidth, clientHeig
             self.rotationSpeed += 0.05;
         else if (self.sprite.rotation < self.rotationSpeed)
             self.rotationSpeed -= 0.05;
+
+        self.sprite.setTexture(spriteObj.ship_accelerate_texture);
     }
 
     var updateNoKey = function (tick) {
@@ -105,6 +122,8 @@ function PlayerShip(sprite, position, keyboard, bullets, clientWidth, clientHeig
             self.rotationSpeed += 0.05;
         else if (self.sprite.rotation < self.rotationSpeed)
             self.rotationSpeed -= 0.05;
+            
+        self.sprite.setTexture(spriteObj.ship_texture);
     }
 
     var updateBackKey = function (tick) {
@@ -120,6 +139,13 @@ function PlayerShip(sprite, position, keyboard, bullets, clientWidth, clientHeig
             self.rotationSpeed += 0.05;
         else if (self.sprite.rotation < self.rotationSpeed)
             self.rotationSpeed -= 0.05;
+
+        if (self.speed == 0) {            
+            self.sprite.setTexture(spriteObj.ship_texture);
+        }
+        else {
+            self.sprite.setTexture(spriteObj.ship_deccelerate_texture);
+        }
     }
     
     var repositionIfOutsideBounds = function () {

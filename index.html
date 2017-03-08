@@ -12,14 +12,23 @@
         <script src="src/helpers/keyboard.js"></script>
         <script src="src/helpers/collisionDetection.js"></script>
 
+        <script src="src/collision/playerAsteroidCollisions.js"></script>
         <script src="src/collision/asteroidCollisions.js"></script>
         <script src="src/collision/asteroidBulletCollisions.js"></script>
 
+        <script src="src/gameObjects/intro.js"></script>
+        <script src="src/gameObjects/level.js"></script>
+        <script src="src/gameObjects/scoreCounter.js"></script>
+        <script src="src/gameObjects/scoreBoard.js"></script>
+        <script src="src/gameObjects/backgroundPainter.js"></script>
         <script src="src/gameObjects/playerShip.js"></script>
         <script src="src/gameObjects/playerBullets.js"></script>
         <script src="src/gameObjects/asteroids.js"></script>
         <script src="src/entry.js"></script>
         <script type="text/javascript">
+            window.wasteAll = false;
+            window.godMode = true;
+
             window.onload = Game;
         </script>
     </head>

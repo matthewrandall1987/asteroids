@@ -18,6 +18,10 @@ function AsteroidCollisions(gameObjects) {
         var index = asteroids.indexOf(asteroid);
         asteroids.splice(index, 1);
     }
+
+    self.clear = function() {
+        asteroids = [];
+    }
     
     self.update = function () {
         for (var i = 0; i < asteroids.length; i++)

@@ -19,6 +19,14 @@ function AsteroidBulletCollisions(gameObjects) {
         bullets.push(bullet);
     }
 
+    self.clearBullets = function () {
+        bullets = [];
+    }
+
+    self.clearAsteroids = function () {
+        asteroids = [];
+    }
+
     self.removeAsteroid = function (asteroid) {
         var index = asteroids.indexOf(asteroid);
         asteroids.splice(index, 1);
@@ -36,7 +44,7 @@ function AsteroidBulletCollisions(gameObjects) {
                 if (bullets[i] == undefined || asteroids[j] == undefined)
                     continue;
 
-                if (collisionDetection.isCollided(bullets[i].sprite, asteroids[j].sprite))
+                if (window.wasteAll || collisionDetection.isCollided(bullets[i].sprite, asteroids[j].sprite))
                 {
                     var iobj = makeEventObject(bullets[i]);
                     var jobj = makeEventObject(asteroids[j]);

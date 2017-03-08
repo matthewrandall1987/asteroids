@@ -1,5 +1,5 @@
 
-function AsteroidFactory(asteroidCollision, asteroidBulletCollision) {
+function AsteroidFactory(asteroidCollision, asteroidBulletCollision, playerAsteroidCollisions, scoreCounter) {
 
     var self = this;
 
@@ -12,19 +12,33 @@ function AsteroidFactory(asteroidCollision, asteroidBulletCollision) {
     var _stage;
     var _gameObjects;
     var _make_large;
+    
+    var _scoreCounter;
+    var _killCount = 0;
+    var _levelCompleteKillCount = 0;
+    var _totalNumberOfAsteroids = 0;
+    var _level = 0;
+
+    var asteroids = [];
 
     var asteroidsToMake = [];
 
-    self.start = function (sprites, renderer, stage, gameObjects) {    
-
+    self.start = function (sprites, renderer, stage, gameObjects, level, completedCallback) {    
+        self.isDelete = false;
         _clientHeight = renderer.view.clientHeight;
         _clientWidth = renderer.view.clientWidth;        
         _gameObjects = gameObjects;        
         _make_large = sprites.large_asteroids;
         _stage = stage;
+        _scoreCounter = scoreCounter;
+        _killCount = 0;
+        _levelCompleteKillCount = level + (level * 4) + ((level * 4) * 4);  
+        _totalNumberOfAsteroids = level;     
+        _completedCallback = completedCallback; 
+        _level = level;
 
         _gameObjects.push(self);          
-        for (var i = 0; i < 3; i ++) {
+        for (var i = 0; i < _totalNumberOfAsteroids; i ++) {
             asteroidsToMake.push({ type: "large", position: nextRandomAsteroid() });
         }
     };
@@ -36,6 +50,11 @@ function AsteroidFactory(asteroidCollision, asteroidBulletCollision) {
         }
 
         asteroidsToMake = [];
+
+        if (_killCount === _levelCompleteKillCount) {
+            self.isDelete = true;
+            _completedCallback(_level);
+        }
     };
 
     var makeAsteroid = function (type, position) {       
@@ -46,25 +65,38 @@ function AsteroidFactory(asteroidCollision, asteroidBulletCollision) {
                 _clientWidth, 
                 _clientHeight, 
                 _stage,
-                type);
+                type,
+                _scoreCounter);
 
             asteroid.addOnDestroyed(onDestroyed);
             asteroidCollision.add(asteroid);
             asteroidBulletCollision.addAsteroid(asteroid);
+            playerAsteroidCollisions.addAsteroid(asteroid);
 
             _gameObjects.push(asteroid);
+
+            asteroids.push(asteroid);
     }
 
     self.stop = function () {
+        asteroidBulletCollision.clearAsteroids();
+        asteroidCollision.clear();
+        playerAsteroidCollisions.clearAsteroids();
 
-    };
-    
+        for (var i = 0; i < asteroids.length; i++) {
+            asteroids[i].stop();
+        }
+
+        asteroids = [];
+
+        self.isDelete = true;
+    };    
 
     var nextAsteroid = function (asteroid, type, i) {
         var speed = Math.floor(Math.random() * (_maxspeed - _minspeed + 1) + _minspeed);
         
-        var width = type == "medium" ? asteroid.sprite.width / 2 : asteroid.sprite.width / 4;
-        var height = type == "medium" ? asteroid.sprite.height / 2 : asteroid.sprite.height / 4;
+        var width = type == "medium" ? asteroid.sprite.width / 1.5 : asteroid.sprite.width / 3;
+        var height = type == "medium" ? asteroid.sprite.height / 1.5 : asteroid.sprite.height / 3;
 
         var randomRotation = Math.random() * (0.349066 + 1);
 
@@ -102,6 +134,13 @@ function AsteroidFactory(asteroidCollision, asteroidBulletCollision) {
     var onDestroyed = function (asteroid) {
         asteroidCollision.remove(asteroid);         
         asteroidBulletCollision.removeAsteroid(asteroid);
+        playerAsteroidCollisions.removeAsteroid(asteroid);
+        _killCount++;
+
+        asteroid.stop();
+
+        var index = asteroids.indexOf(asteroid);
+        asteroids.splice(index, 0);
  
         var type = asteroid.type == "large" ? "medium" : "small";
 
@@ -128,9 +167,10 @@ function AsteroidExplosion() {
 }
 
 
-function Asteroid(sprite, values, clientWidth, clientHeight, stage, type) {
+function Asteroid(sprite, values, clientWidth, clientHeight, stage, type, scoreCounter) {
 
     var self = this;
+    var _scoreCounter;
 
     self.sprite = sprite;
     self.rotationSpeed = 0;
@@ -144,6 +184,8 @@ function Asteroid(sprite, values, clientWidth, clientHeight, stage, type) {
     var onDestroyedDelegates = [];
 
     var init = function () {
+        _scoreCounter = scoreCounter;
+
         self.sprite.x = values.x;
         self.sprite.y = values.y;
 
@@ -195,11 +237,15 @@ function Asteroid(sprite, values, clientWidth, clientHeight, stage, type) {
     }
 
     self.struck = function (bullet) {
-        self.isDelete = true;
-        stage.removeChild(self.sprite);
+        _scoreCounter.increment();
 
         for (var i = 0; i < onDestroyedDelegates.length; i++)
             onDestroyedDelegates[i](self);
+    };
+
+    self.stop = function () {
+        self.isDelete = true;
+        stage.removeChild(self.sprite);
     };
 
     var repositionIfOutsideBounds = function () {

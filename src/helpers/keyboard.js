@@ -23,6 +23,14 @@ function Keyboard () {
         return keys["32"] == true; 
     };
 
+    self.isEnter = function () {
+        return keys["13"] == true;
+    }
+
+    self.isEsc = function () {
+        return keys["27"] == true;
+    }
+
     document.onkeydown = function (key) {
         var charCode = key.keyCode || key.which;
         keys[charCode.toString()] = true;
