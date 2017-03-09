@@ -74,6 +74,7 @@ function Game() {
     var endGame = function () {
         _asteroidFactory.stop();
         _scoreCounter.stop();
+        _level = 0;
 
         _scoreBoard = new ScoreBoard(gameObjects, stage, renderer, keyboard, startGame);
         _scoreBoard.addScore(_scoreCounter.getScore());
@@ -94,6 +95,7 @@ function Game() {
 
         for (var i = 0; i < toDel.length; i++) {
             var index = gameObjects.indexOf(toDel[i]);
+            delete gameObjects[index];
             gameObjects.splice(index, 1);
         }
 
