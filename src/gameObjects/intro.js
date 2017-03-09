@@ -31,7 +31,7 @@ function Intro(gameObjects, stage, renderer, keyboard, startGame) {
 
     self.update = function (ticks) {
         stage.removeChild(_richText);
-        _richText = new PIXI.Text('Welcome to Matts awesome ASTEROIDS!!!\n\nKeys:\n To Move: Up/Down/Left/Right\n Space to shoot\n\nPress Enter to Start!!!', _style);
+        _richText = new PIXI.Text('Welcome to Matts awesome ASTEROIDS!!!\n\nKeys:\n To Move: W/S/A/D\n Space to shoot\n\nPress Enter to Start!!!', _style);
         _richText.x = (_width / 2) - 398;
         _richText.y = (_height / 2) - 140;
         stage.addChild(_richText);

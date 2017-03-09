@@ -56,7 +56,7 @@ function ScoreBoard(gameObjects, stage, renderer, keyboard, entry) {
     self.update = function (ticks) {
         stage.removeChild(richText);
         richText = new PIXI.Text(''+
-            '           Game Over!!!\n\n' + 
+            '         Game Over!!!\n\n' + 
             '           Scores:' +
             '\n            1st. ' + scores[0] +
             '\n            2nd. ' + scores[1] + 

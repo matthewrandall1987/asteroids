@@ -74,16 +74,16 @@ function PlayerBullet(stage, sprite, onDestroyed, clientWidth, clientHeight) {
 
     var deleteIfOutsideBounds = function () {
         
-        if (self.sprite.x <= 0)
+        if (self.sprite.x <= -50)
             deleteme();
 
-        else if (self.sprite.x >= clientWidth)
+        else if (self.sprite.x >= clientWidth + 50)
             deleteme();
 
-        if (self.sprite.y <= 0)
+        if (self.sprite.y <= -50)
             deleteme();
 
-        else if (self.sprite.y >= clientHeight)
+        else if (self.sprite.y >= clientHeight + 50)
             deleteme();
     };
 

@@ -4,19 +4,19 @@ function Keyboard () {
     var keys = [];
 
     self.isUp = function () { 
-        return keys["38"] == true; 
+        return keys["87"] == true; 
     };
 
     self.isDown = function () {
-        return keys["40"] == true; 
+        return keys["83"] == true; 
     };
 
     self.isLeft = function () { 
-        return keys["37"] == true; 
+        return keys["65"] == true; 
     };
 
     self.isRight = function () { 
-        return keys["39"] == true; 
+        return keys["68"] == true; 
     };
 
     self.isSpace = function () { 
@@ -31,14 +31,18 @@ function Keyboard () {
         return keys["27"] == true;
     }
 
-    document.onkeydown = function (key) {
-        var charCode = key.keyCode || key.which;
+    document.onkeydown = function (event) {
+        var charCode = event.keyCode || event.which;
         keys[charCode.toString()] = true;
+        
+        event.preventDefault();
     };
 
     
-    document.onkeyup = function (key) {
-        var charCode = key.keyCode || key.which;
+    document.onkeyup = function (event) {
+        var charCode = event.keyCode || event.which;
         keys[charCode.toString()] = false;
+        
+        event.preventDefault();
     };
 }
